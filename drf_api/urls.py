@@ -19,5 +19,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('profiles.urls')),
+    path('', include('products.urls')),
     path('api-auth/', include('rest_framework.urls')),  # For DRF's browsable API login
 ]
