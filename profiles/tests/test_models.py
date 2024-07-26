@@ -27,8 +27,12 @@ class ProfileModelTest(TestCase):
         """
         profile = Profile.objects.first()
         profile.name = 'New Name'
+        profile.address = 'New Address'
+        profile.phone_number = '1234567890'
         profile.save()
         self.assertEqual(Profile.objects.first().name, 'New Name')
+        self.assertEqual(Profile.objects.first().address, 'New Address')
+        self.assertEqual(Profile.objects.first().phone_number, '1234567890')
 
     def test_profile_default_image(self):
         """
