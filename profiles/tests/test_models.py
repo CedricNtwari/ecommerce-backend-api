@@ -27,12 +27,22 @@ class ProfileModelTest(TestCase):
         """
         profile = Profile.objects.first()
         profile.name = 'New Name'
-        profile.address = 'New Address'
-        profile.phone_number = '1234567890'
+        profile.street_address = 'New Street'
+        profile.city = 'New City'
+        profile.state = 'New State'
+        profile.postal_code = '12345'
+        profile.country = 'CH'
+        profile.phone_number = '+41764567890'
+        profile.content = 'New Content'
         profile.save()
         self.assertEqual(Profile.objects.first().name, 'New Name')
-        self.assertEqual(Profile.objects.first().address, 'New Address')
-        self.assertEqual(Profile.objects.first().phone_number, '1234567890')
+        self.assertEqual(Profile.objects.first().street_address, 'New Street')
+        self.assertEqual(Profile.objects.first().city, 'New City')
+        self.assertEqual(Profile.objects.first().state, 'New State')
+        self.assertEqual(Profile.objects.first().postal_code, '12345')
+        self.assertEqual(Profile.objects.first().country.code, 'CH')
+        self.assertEqual(Profile.objects.first().phone_number.as_e164, '+41764567890')
+        self.assertEqual(Profile.objects.first().content, 'New Content')
 
     def test_profile_default_image(self):
         """

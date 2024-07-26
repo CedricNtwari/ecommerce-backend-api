@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Product
+from profiles.models import Profile
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 class ProductTestCase(TestCase):
@@ -11,6 +12,25 @@ class ProductTestCase(TestCase):
         self.client = APIClient()
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.user2 = User.objects.create_user(username='otheruser', password='12345')
+        
+        self.profile = Profile.objects.get(owner=self.user)
+        self.profile.street_address = 'Test Street'
+        self.profile.city = 'Test City'
+        self.profile.state = 'Test State'
+        self.profile.postal_code = '12345'
+        self.profile.country = 'CH'
+        self.profile.phone_number = '+41764567890'
+        self.profile.save()
+
+        self.profile2 = Profile.objects.get(owner=self.user2)
+        self.profile2.street_address = 'Other Street'
+        self.profile2.city = 'Other City'
+        self.profile2.state = 'Other State'
+        self.profile2.postal_code = '54321'
+        self.profile2.country = 'CH'
+        self.profile2.phone_number = '+41764567891'
+        self.profile2.save()
+
         self.product = Product.objects.create(
             owner=self.user,
             name='Test Product',
@@ -47,6 +67,12 @@ class ProductTestCase(TestCase):
         response = self.client.get(f'/products/{self.product.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], self.product.name)
+        self.assertEqual(response.data['street_address'], self.profile.street_address)
+        self.assertEqual(response.data['city'], self.profile.city)
+        self.assertEqual(response.data['state'], self.profile.state)
+        self.assertEqual(response.data['postal_code'], self.profile.postal_code)
+        self.assertEqual(response.data['country'], 'Switzerland')  # Ensure we match the expected string
+        self.assertEqual(response.data['phone_number'], str(self.profile.phone_number))
 
     def test_update_product(self):
         self.client.login(username='testuser', password='12345')
@@ -121,7 +147,7 @@ class ProductTestCase(TestCase):
     def test_product_creation_validation_error(self):
         self.client.login(username='testuser', password='12345')
         data = {
-            'name': '',  # Name is required
+            'name': '',
             'description': 'New Description',
             'price': 150.00,
             'stock': 5,

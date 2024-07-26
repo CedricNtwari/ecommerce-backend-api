@@ -27,25 +27,44 @@ class ProfileDetailTestCase(TestCase):
         Ensure the owner can update their profile by ID.
         """
         self.client.login(username='testuser', password='12345')
-        response = self.client.put(
-            f'/profiles/{self.profile.id}/', 
-            {'name': 'Updated Name', 'address': 'Updated Address', 'phone_number': '1234567890'}
-        )
+        data = {
+            'name': 'Updated Name',
+            'street_address': 'Updated Street',
+            'city': 'Updated City',
+            'state': 'Updated State',
+            'postal_code': '12345',
+            'country': 'CH',
+            'phone_number': '+41764567890',
+            'content': 'Updated Content'
+        }
+        response = self.client.put(f'/profiles/{self.profile.id}/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.name, 'Updated Name')
-        self.assertEqual(self.profile.address, 'Updated Address')
-        self.assertEqual(self.profile.phone_number, '1234567890')
+        self.assertEqual(self.profile.street_address, 'Updated Street')
+        self.assertEqual(self.profile.city, 'Updated City')
+        self.assertEqual(self.profile.state, 'Updated State')
+        self.assertEqual(self.profile.postal_code, '12345')
+        self.assertEqual(self.profile.country.code, 'CH')
+        self.assertEqual(self.profile.phone_number.as_e164, '+41764567890')
+        self.assertEqual(self.profile.content, 'Updated Content')
 
     def test_update_profile_not_owner(self):
         """
         Ensure a user cannot update another user's profile.
         """
         self.client.login(username='otheruser', password='12345')
-        response = self.client.put(
-            f'/profiles/{self.profile.id}/', 
-            {'name': 'Updated Name', 'address': 'Updated Address', 'phone_number': '1234567890'}
-        )
+        data = {
+            'name': 'Updated Name',
+            'street_address': 'Updated Street',
+            'city': 'Updated City',
+            'state': 'Updated State',
+            'postal_code': '12345',
+            'country': 'CH',
+            'phone_number': '+41764567890',
+            'content': 'Updated Content'
+        }
+        response = self.client.put(f'/profiles/{self.profile.id}/', data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_profile(self):

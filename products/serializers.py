@@ -28,11 +28,9 @@ class ProductSerializer(serializers.ModelSerializer):
         return request.user == obj.owner if request else False
 
     def get_phone_number(self, obj):
-        # Convert the phone number to a string
         return str(obj.owner.profile.phone_number)
     
     def get_country(self, obj):
-        # Convert the country object to a string
         return obj.owner.profile.country.name if obj.owner.profile.country else None
 
     class Meta:
