@@ -20,6 +20,7 @@ class ProfileDetailTestCase(TestCase):
         response = self.client.get(f'/profiles/{self.profile.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], self.profile.name)
+        self.assertTrue(response.data['is_owner'])
 
     def test_update_profile(self):
         """

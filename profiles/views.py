@@ -11,3 +11,6 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_serializer_context(self):
+        return {'request': self.request}
