@@ -1,11 +1,14 @@
 from rest_framework import serializers
 from .models import Product
+from profiles.models import Profile
 
 class ProductSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     is_owner = serializers.SerializerMethodField()
     profile_id = serializers.ReadOnlyField(source='owner.profile.id')
     profile_image = serializers.ReadOnlyField(source='owner.profile.image.url')
+    address = serializers.ReadOnlyField(source='owner.profile.address')
+    phone_number = serializers.ReadOnlyField(source='owner.profile.phone_number')
 
     def validate_image(self, value):
         if value.size > 2 * 1024 * 1024:
@@ -25,5 +28,5 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'owner', 'is_owner', 'profile_id', 'profile_image',
             'created_at', 'updated_at', 'name', 'description', 'price',
-            'stock', 'image', 'image_filter'
+            'stock', 'image', 'image_filter','address', 'phone_number'
         ]
