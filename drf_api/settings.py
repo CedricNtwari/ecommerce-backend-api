@@ -64,12 +64,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cloudinary',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'django_countries',
     
 
     'profiles',
     'products',
+    'orders',
 ]
 
 MIDDLEWARE = [
