@@ -135,6 +135,17 @@ This repository contains the backend for a scalable eCommerce application develo
   - Example: `GET /orders/?status=Pending`
   - Example: `GET /orders/?total_price=100.00`
 
+### Cart Management
+
+- `GET /carts/` : List all carts (admin only)
+- `POST /carts/`: Create a new cart
+- `GET /carts/{id}/`: Retrieve a cart by ID
+- `PUT /carts/{id}/`: Update a cart by ID
+- `DELETE /carts/{id}/`: Delete a cart by ID (admin only)
+- `POST /carts/{id}/add_item/`: Add an item to a cart
+- `POST /carts/{id}/remove_item/`: Remove an item from a cart
+- `POST /carts/{id}/update_quantity/`: Update quantity of an item in a cart
+
 ### Reviews
 
 - `GET /api/reviews/`: List all reviews
