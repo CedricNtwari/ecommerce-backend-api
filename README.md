@@ -99,7 +99,7 @@ This repository contains the backend for a scalable eCommerce application develo
 - `PUT /api/profiles/:id/`: Update a profile
 - `DELETE /api/profiles/:id/`: Delete a profile
 
-### Products
+### Products Management
 
 - `GET /api/products/`: List all products
 - `GET /api/products/:id/`: Retrieve a specific product
@@ -107,13 +107,33 @@ This repository contains the backend for a scalable eCommerce application develo
 - `PUT /api/products/:id/`: Update a product
 - `DELETE /api/products/:id/`: Delete a product
 
-### Orders
+### Order Management
 
-- `GET /api/orders/`: List all orders
-- `GET /api/orders/:id/`: Retrieve a specific order
-- `POST /api/orders/`: Create a new order
-- `PUT /api/orders/:id/`: Update an order
-- `DELETE /api/orders/:id/`: Delete an order
+- `GET /orders/` : List all orders (admin only)
+- `POST /orders/`: Create a new order
+- `GET /orders/{id}/`: Retrieve an order by ID
+- `PUT /orders/{id}/`: Update an order by ID
+- `DELETE /orders/{id}/`: Delete an order by ID (admin only)
+- `POST /orders/{id}/cancel/`: Cancel an order by ID
+- `POST /orders/{id}/add_item/`: Add an item to an order
+
+### Order History
+
+- `GET /order-history/`: List all reviews
+
+### Search and Filter Endpoints
+
+- `GET /orders/?search={query}`: Search orders by order number, owner username, or status
+
+  - Example: `GET /orders/?search=22861A5D5B2043A8B8E0`
+  - Example: `GET /orders/?search=haydee`
+  - Example: `GET /orders/?search=Pending`
+
+- `GET /orders/?order_number={order_number}&owner__username={owner_username}&status={status}&total_price={total_price}`: Filter orders by order number, owner username, status, or total price
+  - Example: `GET /orders/?order_number=22861A5D5B2043A8B8E0`
+  - Example: `GET /orders/?owner__username=haydee`
+  - Example: `GET /orders/?status=Pending`
+  - Example: `GET /orders/?total_price=100.00`
 
 ### Reviews
 
