@@ -22,6 +22,7 @@ urlpatterns = [
     path('', include('profiles.urls')),
     path('', include('products.urls')),
     path('', include('orders.urls')),
+    path('', include('cart.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]
