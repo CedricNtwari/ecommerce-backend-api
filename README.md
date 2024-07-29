@@ -146,13 +146,13 @@ This repository contains the backend for a scalable eCommerce application develo
 - `POST /carts/{id}/remove_item/`: Remove an item from a cart
 - `POST /carts/{id}/update_quantity/`: Update quantity of an item in a cart
 
-### Reviews
+### Reviews management
 
-- `GET /api/reviews/`: List all reviews
-- `GET /api/reviews/:id/`: Retrieve a specific review
-- `POST /api/reviews/`: Create a new review
-- `PUT /api/reviews/:id/`: Update a review
-- `DELETE /api/reviews/:id/`: Delete a review
+- `GET /reviews/`: List all reviews
+- `GET /reviews/:id/`: Retrieve a specific review
+- `POST /reviews/`: Create a new review
+- `PUT /reviews/:id/`: Update a review
+- `DELETE /reviews/:id/`: Delete a review
 
 ## Contributing
 
