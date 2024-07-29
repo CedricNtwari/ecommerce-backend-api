@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Product
 from profiles.models import Profile
+from reviews.models import Review
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 class ProductTestCase(TestCase):
@@ -43,6 +44,12 @@ class ProductTestCase(TestCase):
                 content_type='image/jpeg'
             )
         )
+        self.review = Review.objects.create(
+            product=self.product,
+            owner=self.user,
+            rating=5,
+            comment='Great product!'
+        )
         self.image = SimpleUploadedFile(
             name='test_image.jpg',
             content=open('products/test_image.jpg', 'rb').read(),
@@ -73,6 +80,8 @@ class ProductTestCase(TestCase):
         self.assertEqual(response.data['postal_code'], self.profile.postal_code)
         self.assertEqual(response.data['country'], 'Switzerland')  # Ensure we match the expected string
         self.assertEqual(response.data['phone_number'], str(self.profile.phone_number))
+        self.assertEqual(response.data['review_count'], 1)
+        self.assertEqual(response.data['average_rating'], 5.0)
 
     def test_update_product(self):
         self.client.login(username='testuser', password='12345')

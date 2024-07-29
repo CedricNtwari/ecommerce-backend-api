@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Product
-from profiles.models import Profile
+from reviews.models import Review
+from django.db.models import Avg
 
 class ProductSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -13,6 +14,8 @@ class ProductSerializer(serializers.ModelSerializer):
     postal_code = serializers.ReadOnlyField(source='owner.profile.postal_code')
     country = serializers.SerializerMethodField()
     phone_number = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
 
     def validate_image(self, value):
         if value.size > 2 * 1024 * 1024:
@@ -33,11 +36,18 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_country(self, obj):
         return obj.owner.profile.country.name if obj.owner.profile.country else None
 
+    def get_review_count(self, obj):
+        return obj.reviews.count()
+
+    def get_average_rating(self, obj):
+        return obj.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+
     class Meta:
         model = Product
         fields = [
             'id', 'owner', 'is_owner', 'profile_id', 'profile_image',
             'created_at', 'updated_at', 'name', 'description', 'price',
             'stock', 'image', 'image_filter', 'street_address', 'city', 
-            'state', 'postal_code', 'country', 'phone_number'
+            'state', 'postal_code', 'country', 'phone_number',
+            'review_count', 'average_rating'
         ]
