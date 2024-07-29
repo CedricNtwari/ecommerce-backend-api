@@ -7,7 +7,17 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return obj.owner == request.user
 
     def has_permission(self, request, view):
-        if view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
-            obj = view.get_object()
-            return self.has_object_permission(request, view, obj)
-        return True
+        if hasattr(view, 'action'):
+            # This is for viewsets
+            if view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
+                obj = view.get_object()
+                return self.has_object_permission(request, view, obj)
+            return True
+        else:
+            # This is for non-viewset views
+            if request.method in permissions.SAFE_METHODS:
+                return True
+            if request.method in ['PUT', 'PATCH', 'DELETE']:
+                obj = view.get_object()
+                return self.has_object_permission(request, view, obj)
+            return True

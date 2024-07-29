@@ -1,6 +1,5 @@
-from django.db.models import Count
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_api.permissions import IsOwnerOrReadOnly
 from .models import Product
 from .serializers import ProductSerializer
