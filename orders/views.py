@@ -1,6 +1,7 @@
-from rest_framework import generics, viewsets, permissions, status, serializers
+from rest_framework import generics, viewsets, permissions, status, serializers, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +10,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['order_number', 'owner__username', 'status', 'total_price']
+    search_fields = ['order_number', 'owner__username' , 'status']
 
     def perform_create(self, serializer):
         # Generate unique order number
