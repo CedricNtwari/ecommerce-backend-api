@@ -88,9 +88,16 @@ This repository contains the backend for a scalable eCommerce application develo
 
 ### Authentication
 
-- `POST /api/auth/login/`: Login a user
-- `POST /api/auth/register/`: Register a new user
-- `POST /api/auth/logout/`: Logout a user
+- `POST /dj-rest-auth/login/`: Login a user
+- `POST /dj-rest-auth/logout/`: Logout a user
+- `POST /dj-rest-auth/password/reset/`: Reset user password
+- `POST /dj-rest-auth/password/reset/confirm/`: Confirm password reset
+- `POST /dj-rest-auth/password/change/`: Change user password
+
+### Registration
+
+- `POST /dj-rest-auth/registration/`: Register a new user
+- `POST /dj-rest-auth/registration/verify-email/`: Verify user email
 
 ### User Profiles
 
@@ -98,6 +105,7 @@ This repository contains the backend for a scalable eCommerce application develo
 - `GET /api/profiles/:id/`: Retrieve a specific profile
 - `PUT /api/profiles/:id/`: Update a profile
 - `DELETE /api/profiles/:id/`: Delete a profile
+- `DELETE /dj-rest-auth/user/`: Retrieve authenticated user details
 
 ### Products Management
 
@@ -153,6 +161,19 @@ This repository contains the backend for a scalable eCommerce application develo
 - `POST /reviews/`: Create a new review
 - `PUT /reviews/:id/`: Update a review
 - `DELETE /reviews/:id/`: Delete a review
+
+### Social Authentication (Optional)
+
+- `POST /dj-rest-auth/facebook/`: Facebook login
+- `POST /dj-rest-auth/google/`: Google login
+- `GET /socialaccounts/`: List all social accounts connected to the authenticated user
+- `POST /socialaccounts/{pk}/disconnect/`: Disconnect a social account from the authenticated user
+
+### JSON Web Token (JWT) Support (Optional)
+
+- POST /dj-rest-auth/jwt/create/: Obtain a new JWT
+- POST /dj-rest-auth/jwt/refresh/: Refresh an existing JWT
+- POST /dj-rest-auth/jwt/verify/: Verify a JWT
 
 ## Contributing
 
