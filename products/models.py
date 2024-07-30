@@ -16,7 +16,7 @@ class Product(models.Model):
         ('walden', 'Walden'), ('xpro2', 'X-pro II')
     ]
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255)
