@@ -30,7 +30,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_is_owner(self, obj):
         request = self.context.get('request')
         return request.user == obj.owner if request else False
-
+    
     def validate_phone_number(self, value):
         for country_code in EU_COUNTRY_CODES:
             try:
