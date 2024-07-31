@@ -1,3 +1,4 @@
+# settings.py
 import os
 import dj_database_url
 from pathlib import Path
@@ -98,7 +99,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'drf_api.wsgi.application'
 
 # Database
-if DEV:
+if 'DEV' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -177,13 +178,15 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%d %b %Y',
 }
 
-if not DEV:
+if 'DEV' not in os.environ:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
         'rest_framework.renderers.JSONRenderer',
     ]
 
 REST_USE_JWT = True
 JWT_AUTH_SECURE = True
+JWT_AUTH_COOKIE = 'my-app-auth'
+JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
 
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'drf_api.serializers.CurrentUserSerializer'
