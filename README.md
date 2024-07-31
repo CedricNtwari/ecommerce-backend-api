@@ -93,6 +93,8 @@ This repository contains the backend for a scalable eCommerce application develo
 - `POST /dj-rest-auth/password/reset/`: Reset user password
 - `POST /dj-rest-auth/password/reset/confirm/`: Confirm password reset
 - `POST /dj-rest-auth/password/change/`: Change user password
+- `POST /dj-rest-auth/registration/verify-email/`: Email Verification
+- `GET /dj-rest-auth/user/`: User Details
 
 ### Registration
 
@@ -161,13 +163,6 @@ This repository contains the backend for a scalable eCommerce application develo
 - `POST /reviews/`: Create a new review
 - `PUT /reviews/:id/`: Update a review
 - `DELETE /reviews/:id/`: Delete a review
-
-### Social Authentication (Optional)
-
-- `POST /dj-rest-auth/facebook/`: Facebook login
-- `POST /dj-rest-auth/google/`: Google login
-- `GET /socialaccounts/`: List all social accounts connected to the authenticated user
-- `POST /socialaccounts/{pk}/disconnect/`: Disconnect a social account from the authenticated user
 
 ### JSON Web Token (JWT) Support (Optional)
 
