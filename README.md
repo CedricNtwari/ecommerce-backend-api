@@ -103,19 +103,19 @@ This repository contains the backend for a scalable eCommerce application develo
 
 ### User Profiles
 
-- `GET /api/profiles/`: List all profiles
-- `GET /api/profiles/:id/`: Retrieve a specific profile
-- `PUT /api/profiles/:id/`: Update a profile
-- `DELETE /api/profiles/:id/`: Delete a profile
+- `GET /profiles/`: List all profiles
+- `GET /profiles/:id/`: Retrieve a specific profile
+- `PUT /profiles/:id/`: Update a profile
+- `DELETE /profiles/:id/`: Delete a profile
 - `DELETE /dj-rest-auth/user/`: Retrieve authenticated user details
 
 ### Products Management
 
-- `GET /api/products/`: List all products
-- `GET /api/products/:id/`: Retrieve a specific product
-- `POST /api/products/`: Create a new product
-- `PUT /api/products/:id/`: Update a product
-- `DELETE /api/products/:id/`: Delete a product
+- `GET /products/`: List all products
+- `GET /products/:id/`: Retrieve a specific product
+- `POST /products/`: Create a new product
+- `PUT /products/:id/`: Update a product
+- `DELETE /products/:id/`: Delete a product
 
 ### Order Management
 
@@ -184,4 +184,4 @@ Contributions are what make the open-source community such an amazing place to l
 
 Cedric Ntwari - @CedricNtwari - ntwaricedric@gmail.com
 
-Project Link: "...".
+Project Link: "https://ecommerce-backend-api-1-abe8f24df824.herokuapp.com/".
