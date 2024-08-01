@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_api.permissions import IsOwnerOrReadOnly
 from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
+from products.models import Product
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
@@ -17,12 +18,10 @@ class CartViewSet(viewsets.ModelViewSet):
         return Cart.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        # Only create a new cart if it doesn't exist for the user
-        cart, created = Cart.objects.get_or_create(owner=self.request.user)
-        if created:
-            serializer.save(owner=self.request.user)
-        else:
-            raise serializers.ValidationError("A cart already exists for this user.")
+        # Check if a cart already exists for the user
+        if Cart.objects.filter(owner=self.request.user).exists():
+            raise serializers.ValidationError({'non_field_errors': ["A cart already exists for this user."]})
+        serializer.save(owner=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_item(self, request):
@@ -33,17 +32,24 @@ class CartViewSet(viewsets.ModelViewSet):
         product_id = request.data.get('product')
         quantity = request.data.get('quantity')
 
+        # Fetch the product to get its price
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         # Check if the item already exists in the cart
         cart_item, created = CartItem.objects.get_or_create(
-            cart=cart, product_id=product_id, defaults={'quantity': quantity}
+            cart=cart, product=product, defaults={'quantity': quantity, 'price': product.price * quantity}
         )
 
         if not created:
-            # If the item already exists, update the quantity
+            # If the item already exists, update the quantity and price
             cart_item.quantity += quantity
+            cart_item.price = cart_item.quantity * product.price
             cart_item.save()
 
-        serializer = CartItemSerializer(cart_item)
+        serializer = CartItemSerializer(cart_item, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])
@@ -61,6 +67,7 @@ class CartViewSet(viewsets.ModelViewSet):
         try:
             cart_item = CartItem.objects.get(id=item_id, cart=cart)
             cart_item.quantity = quantity
+            cart_item.price = cart_item.quantity * cart_item.product.price
             cart_item.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except CartItem.DoesNotExist:
