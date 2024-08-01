@@ -18,19 +18,25 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Generate unique order number
         import uuid
         order_number = str(uuid.uuid4()).replace("-", "").upper()[:20]
-        
+
         # Save the order with the current user and generated order number
         order = serializer.save(owner=self.request.user, order_number=order_number)
-        
+
         # Create order items (this example assumes order items are sent in the request data)
-        order_items_data = self.request.data.get('items')
+        order_items_data = self.request.data.get('order_items', [])
+
+        # Check if order_items_data is None
+        if order_items_data is None:
+            raise serializers.ValidationError("No order items provided.")
+
         for item_data in order_items_data:
             product_id = item_data['product']
             quantity = item_data['quantity']
             price = item_data['price']
             OrderItem.objects.create(order=order, product_id=product_id, quantity=quantity, price=price)
-        
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
     def perform_update(self, serializer):
         instance = self.get_object()
