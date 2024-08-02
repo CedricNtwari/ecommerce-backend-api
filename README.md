@@ -7,6 +7,7 @@ A scalable eCommerce backend API built with Django Rest Framework, providing rob
 - [Project Overview](#project-overview)
 - [Features](#features)
 - [Technologies Used](#technologies-used)
+- [Database Schema](#database-schema)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -14,7 +15,6 @@ A scalable eCommerce backend API built with Django Rest Framework, providing rob
 - [API Endpoints](#api-endpoints)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
-- [License](#license)
 - [Contact](#contact)
 
 ## Project Overview
@@ -37,6 +37,25 @@ This repository contains the backend for a scalable eCommerce application develo
 - Docker (optional for containerization)
 - JWT for Authentication
 - Git & GitHub for version control
+
+## Database Schema
+
+Below is the Entity Relationship Diagram (ERD) that illustrates the database schema used in this eCommerce backend:
+
+![Entity Relationship Diagram](/erd_ecommerce.png)
+
+This diagram shows the relationships and fields within our database, crucial for understanding how data is managed and maintained.
+
+### Diagram Description
+
+- **User:** Represents a user in the system. Each user has a unique profile and cart.
+- **Profile:** Contains additional information about the user, such as their name, address, phone number, and profile picture.
+- **Product:** Represents a product in the inventory. Each product has details such as name, description, price, stock quantity, and an image. It also includes an optional image filter for visual effects.
+- **Order:** Represents an order placed by a user. Each order has a total price and status.
+- **OrderItem:** Represents the individual items in an order. Each item is linked to an order and a product and includes the quantity and price of the product.
+- **Review:** Represents a review for a product written by a user. Each review includes a rating and a comment.
+- **Cart:** Represents a shopping cart belonging to a user. Each cart is unique to a user and contains multiple cart items.
+- **CartItem:** Represents individual items in a cart. Each item is linked to a cart and a product and includes the quantity and price of the product.
 
 ## Getting Started
 
@@ -163,12 +182,6 @@ This repository contains the backend for a scalable eCommerce application develo
 - `POST /reviews/`: Create a new review
 - `PUT /reviews/:id/`: Update a review
 - `DELETE /reviews/:id/`: Delete a review
-
-### JSON Web Token (JWT) Support (Optional)
-
-- POST /dj-rest-auth/jwt/create/: Obtain a new JWT
-- POST /dj-rest-auth/jwt/refresh/: Refresh an existing JWT
-- POST /dj-rest-auth/jwt/verify/: Verify a JWT
 
 ## Contributing
 
