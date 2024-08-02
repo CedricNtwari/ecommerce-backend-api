@@ -1,0 +1,13 @@
+[run]
+omit =
+    */migrations/*
+    */admin.py
+
+[report]
+exclude_lines =
+    # Have to jump through hoops to get code coverage in django.
+    pragma: no cover
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError

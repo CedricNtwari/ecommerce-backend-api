@@ -9,6 +9,7 @@ charset-normalizer==3.3.2
 click==8.1.7
 cloudinary==1.36.0
 colorama==0.4.6
+coverage==7.6.0
 crispy-bootstrap5==0.7
 cryptography==42.0.7
 cssbeautifier==1.15.1
