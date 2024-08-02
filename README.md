@@ -13,7 +13,8 @@ A scalable eCommerce backend API built with Django Rest Framework, providing rob
   - [Installation](#installation)
   - [Running the Application](#running-the-application)
 - [API Endpoints](#api-endpoints)
-- [Project Structure](#project-structure)
+- [Test Covarage](#test-coverage)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Contact](#contact)
 
@@ -42,7 +43,7 @@ This repository contains the backend for a scalable eCommerce application develo
 
 Below is the Entity Relationship Diagram (ERD) that illustrates the database schema used in this eCommerce backend:
 
-![Entity Relationship Diagram](/erd_ecommerce.png)
+![Entity Relationship Diagram](/assets/erd_ecommerce.png)
 
 This diagram shows the relationships and fields within our database, crucial for understanding how data is managed and maintained.
 
@@ -182,6 +183,22 @@ This diagram shows the relationships and fields within our database, crucial for
 - `POST /reviews/`: Create a new review
 - `PUT /reviews/:id/`: Update a review
 - `DELETE /reviews/:id/`: Delete a review
+
+## Test Coverage
+
+To ensure the stability and reliability of the application. I use the `coverage` tool to measure how much of the codebase is covered by automated tests. This helps identify areas that may need more testing and ensures that our code is well-tested.
+
+As of the latest run, our test coverage is as follows:
+
+- **Overall Coverage**: 94%
+
+![Overall Coverage](/assets/coverage-.png)
+![Overall Coverage](/assets/coverage.png)
+
+## Documentation
+
+This section provides a brief introduction to the detailed document that outlines the application's current features and future plans.
+Here: https://docs.google.com/document/d/1wJ9-2GjuKNl_PyEiLAbfdFzHOBG6qeboLvMXuAyu3TY/edit?usp=sharing
 
 ## Contributing
 
