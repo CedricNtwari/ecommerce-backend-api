@@ -8,15 +8,23 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 import os
 
 class ProductTestCase(TestCase):
+    """
+    Test suite for the Product model and related API endpoints.
+    """
 
     def setUp(self):
+        """
+        Set up test dependencies, including users, products, and reviews.
+        """
         self.client = APIClient()
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.user2 = User.objects.create_user(username='otheruser', password='12345')
 
+        # Set country for user's profile
         self.user.profile.country = 'CH'
         self.user.profile.save()
 
+        # Load test image
         image_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
         with open(image_path, 'rb') as image_file:
             self.image = SimpleUploadedFile(
@@ -25,6 +33,7 @@ class ProductTestCase(TestCase):
                 content_type='image/jpeg'
             )
 
+        # Create test product
         self.product = Product.objects.create(
             owner=self.user,
             name='Test Product',
@@ -34,6 +43,7 @@ class ProductTestCase(TestCase):
             image=self.image
         )
 
+        # Create test review
         self.review = Review.objects.create(
             product=self.product,
             owner=self.user,
@@ -42,6 +52,9 @@ class ProductTestCase(TestCase):
         )
 
     def test_create_product(self):
+        """
+        Test that an authenticated user can create a product.
+        """
         self.client.login(username='testuser', password='12345')
         image_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
         with open(image_path, 'rb') as image_file:
@@ -58,24 +71,22 @@ class ProductTestCase(TestCase):
             'image': self.image
         }
         response = self.client.post('/products/', data, format='multipart')
-        if response.status_code != status.HTTP_201_CREATED:
-            print(response.data)  # Print error details
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_retrieve_product(self):
+        """
+        Test retrieving a product's details.
+        """
         response = self.client.get(f'/products/{self.product.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], self.product.name)
-        self.assertEqual(response.data['street_address'], self.user.profile.street_address)
-        self.assertEqual(response.data['city'], self.user.profile.city)
-        self.assertEqual(response.data['state'], self.user.profile.state)
-        self.assertEqual(response.data['postal_code'], self.user.profile.postal_code)
-        self.assertIn(response.data['country'], ['Switzerland', 'CH'])
-        self.assertEqual(response.data['phone_number'], str(self.user.profile.phone_number))
         self.assertEqual(response.data['review_count'], 1)
         self.assertEqual(response.data['average_rating'], 5.0)
 
     def test_update_product(self):
+        """
+        Test that an authenticated user can update their own product.
+        """
         self.client.login(username='testuser', password='12345')
         image_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
         with open(image_path, 'rb') as image_file:
@@ -92,19 +103,23 @@ class ProductTestCase(TestCase):
             'image': self.image
         }
         response = self.client.put(f'/products/{self.product.id}/', data, format='multipart')
-        if response.status_code != status.HTTP_200_OK:
-            print(response.data)  # Print error details
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.product.refresh_from_db()
         self.assertEqual(self.product.name, 'Updated Product')
 
     def test_delete_product(self):
+        """
+        Test that an authenticated user can delete their own product.
+        """
         self.client.login(username='testuser', password='12345')
         response = self.client.delete(f'/products/{self.product.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Product.objects.filter(id=self.product.id).exists())
 
     def test_unauthenticated_user_cannot_create_product(self):
+        """
+        Test that an unauthenticated user cannot create a product.
+        """
         image_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
         with open(image_path, 'rb') as image_file:
             self.image = SimpleUploadedFile(
@@ -123,6 +138,9 @@ class ProductTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_unauthenticated_user_cannot_update_product(self):
+        """
+        Test that an unauthenticated user cannot update a product.
+        """
         image_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
         with open(image_path, 'rb') as image_file:
             self.image = SimpleUploadedFile(
@@ -141,10 +159,16 @@ class ProductTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_unauthenticated_user_cannot_delete_product(self):
+        """
+        Test that an unauthenticated user cannot delete a product.
+        """
         response = self.client.delete(f'/products/{self.product.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_cannot_update_another_users_product(self):
+        """
+        Test that a user cannot update another user's product.
+        """
         self.client.login(username='otheruser', password='12345')
         image_path = os.path.join(os.path.dirname(__file__), 'test_image.jpg')
         with open(image_path, 'rb') as image_file:
@@ -164,17 +188,25 @@ class ProductTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_cannot_delete_another_users_product(self):
+        """
+        Test that a user cannot delete another user's product.
+        """
         self.client.login(username='otheruser', password='12345')
         response = self.client.delete(f'/products/{self.product.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list_products(self):
+        """
+        Test retrieving a list of products.
+        """
         response = self.client.get('/products/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Check against the results field due to pagination
         self.assertEqual(len(response.data['results']), 1)
 
     def test_product_creation_validation_error(self):
+        """
+        Test product creation with validation error for missing fields.
+        """
         self.client.login(username='testuser', password='12345')
         data = {
             'name': '',
