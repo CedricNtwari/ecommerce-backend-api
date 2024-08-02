@@ -8,43 +8,53 @@ from .serializers import CartSerializer, CartItemSerializer
 from products.models import Product
 
 class CartViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing cart instances.
+    The viewset supports retrieving all carts, adding items to carts,
+    removing items from carts, and updating the quantity of items in carts.
+    """
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_queryset(self):
+        """
+        Retrieves the queryset for Cart instances. If the user is staff, they can see all carts.
+        Regular users see only their own carts.
+        """
         if self.request.user.is_staff:
             return Cart.objects.all()
         return Cart.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        # Check if a cart already exists for the user
+        """
+        Custom creation logic for cart. Ensures a user does not create more than one cart.
+        Raises a ValidationError if the user already owns a cart.
+        """
         if Cart.objects.filter(owner=self.request.user).exists():
             raise serializers.ValidationError({'non_field_errors': ["A cart already exists for this user."]})
         serializer.save(owner=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_item(self, request):
-        # Get or create a cart for the current user
+        """
+        Adds a new item to the cart. If the item is already in the cart, it updates the quantity.
+        """
         cart, _ = Cart.objects.get_or_create(owner=request.user)
         
-        # Get the product ID and quantity from the request data
         product_id = request.data.get('product')
         quantity = request.data.get('quantity')
 
-        # Fetch the product to get its price
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
             return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check if the item already exists in the cart
         cart_item, created = CartItem.objects.get_or_create(
             cart=cart, product=product, defaults={'quantity': quantity, 'price': product.price * quantity}
         )
 
         if not created:
-            # If the item already exists, update the quantity and price
             cart_item.quantity += quantity
             cart_item.price = cart_item.quantity * product.price
             cart_item.save()
@@ -54,6 +64,9 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def remove_item(self, request, pk=None):
+        """
+        Removes an item from the cart.
+        """
         cart = self.get_object()
         item_id = request.data.get('item_id')
         CartItem.objects.filter(id=item_id, cart=cart).delete()
@@ -61,6 +74,9 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def update_quantity(self, request, pk=None):
+        """
+        Updates the quantity of an existing cart item and recalculates the price based on the new quantity.
+        """
         cart = self.get_object()
         item_id = request.data.get('item_id')
         quantity = request.data.get('quantity')

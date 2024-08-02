@@ -25,14 +25,10 @@ class CartTestCase(APITestCase):
         """
         Ensure that a cart is created for a user if it doesn't exist.
         """
-        # Ensure the user does not already have a cart
         Cart.objects.filter(owner=self.user).delete()
         
         url = reverse('cart-list')
         response = self.client.post(url, {}, format='json')
-        
-        # Log response for debugging
-        print("Create cart response:", response.data)
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Cart.objects.filter(owner=self.user).count(), 1)
@@ -41,10 +37,8 @@ class CartTestCase(APITestCase):
         """
         Ensure we can add an item to the cart.
         """
-        # Log in as the user with a cart
         self.client.login(username='testuser', password='password')
 
-        # Create a product
         product = Product.objects.create(
             owner=self.user,
             name='Test Product',
@@ -52,7 +46,6 @@ class CartTestCase(APITestCase):
             stock=100
         )
 
-        # Add the item to the cart
         url = reverse('cart-add-item')
         response = self.client.post(url, {'product': product.id, 'quantity': 2}, format='json')
 
@@ -65,15 +58,10 @@ class CartTestCase(APITestCase):
         """
         Ensure that an admin user can list all carts.
         """
-        # Log in as the admin user
         self.client.login(username='adminuser', password='password')
 
         url = reverse('cart-list')
         response = self.client.get(url, format='json')
 
-        # Log the response data for debugging purposes
-        print("Response data:", response.data)
-
-        # Assert that the admin can see all carts
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['count'], Cart.objects.count())  # Admin should see all carts
+        self.assertEqual(response.data['count'], Cart.objects.count())
