@@ -1,6 +1,7 @@
 import os
 import dj_database_url
 from pathlib import Path
+from corsheaders.defaults import default_headers
 
 if os.path.exists('env.py'):
     import env
@@ -77,6 +78,18 @@ else:
     ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'content-type',
+]
+CORS_ALLOWED_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
 
 JWT_AUTH_COOKIE = 'my-app-auth'
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
