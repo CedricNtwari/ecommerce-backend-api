@@ -1,4 +1,5 @@
 import os
+import re
 import dj_database_url
 from pathlib import Path
 from corsheaders.defaults import default_headers
@@ -66,7 +67,8 @@ MIDDLEWARE = [
 # CORS Configuration
 if DEV:
     CORS_ALLOWED_ORIGINS = [
-        'http://localhost:3000'
+        'http://localhost:3000',
+        os.environ.get('CLIENT_ORIGIN_DEV', ''),
     ]
 elif 'CLIENT_ORIGIN' in os.environ:
     CORS_ALLOWED_ORIGINS = [
@@ -75,6 +77,12 @@ elif 'CLIENT_ORIGIN' in os.environ:
 else:
     CORS_ALLOWED_ORIGINS = [
         'http://localhost:3000'
+    ]
+
+if 'CLIENT_ORIGIN_DEV' in os.environ:
+    extracted_url = re.match(r'^https?://[^/]+', os.environ.get('CLIENT_ORIGIN_DEV')).group(0)
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        rf"{extracted_url.replace('.', r'\.')}.(eu|us)\d+\.gitpod\.io$",
     ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -89,7 +97,6 @@ CORS_ALLOWED_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
-
 
 JWT_AUTH_COOKIE = 'my-app-auth'
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
@@ -119,7 +126,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'drf_api.wsgi.application'
 
 # Database
-if 'DEV' in os.environ:
+if DEV:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -198,11 +205,10 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%d %b %Y',
 }
 
-if 'DEV' not in os.environ:
+if not DEV:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
         'rest_framework.renderers.JSONRenderer',
     ]
-
 
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'drf_api.serializers.CurrentUserSerializer'
