@@ -81,8 +81,9 @@ else:
 
 if 'CLIENT_ORIGIN_DEV' in os.environ:
     extracted_url = re.match(r'^https?://[^/]+', os.environ.get('CLIENT_ORIGIN_DEV')).group(0)
+    escaped_url = re.escape(extracted_url)
     CORS_ALLOWED_ORIGIN_REGEXES = [
-        rf"{extracted_url.replace('.', r'\.')}.(eu|us)\d+\.gitpod\.io$",
+        rf"{escaped_url}\.(eu|us)\d+\.gitpod\.io$",
     ]
 
 CORS_ALLOW_CREDENTIALS = True
