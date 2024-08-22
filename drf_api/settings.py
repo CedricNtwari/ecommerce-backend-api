@@ -1,5 +1,4 @@
 import os
-import re
 import dj_database_url
 from pathlib import Path
 from corsheaders.defaults import default_headers
@@ -20,6 +19,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = DEV
 
 print(f"DEBUG is set to {DEBUG}")
+print(f"CLIENT_ORIGIN_DEV: {os.environ.get('CLIENT_ORIGIN_DEV')}")
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
@@ -79,25 +79,16 @@ else:
         'http://localhost:3000'
     ]
 
-if 'CLIENT_ORIGIN_DEV' in os.environ:
-    extracted_url = re.match(r'^https?://[^/]+', os.environ.get('CLIENT_ORIGIN_DEV')).group(0)
-    escaped_url = re.escape(extracted_url)
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        rf"{escaped_url}\.(eu|us)\d+\.gitpod\.io$",
-    ]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'https://3000-cedricntwar-tradecorner-5omzfawcp8b.ws.codeinstitute-ide.net',
+]
+
+print(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'content-type',
-]
-CORS_ALLOWED_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
-]
+CORS_ALLOW_HEADERS = list(default_headers) + ['content-type']
+CORS_ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 
 JWT_AUTH_COOKIE = 'my-app-auth'
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
