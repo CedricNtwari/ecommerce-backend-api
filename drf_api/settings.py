@@ -79,11 +79,6 @@ else:
         'http://localhost:3000'
     ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://3000-cedricntwar-tradecorner-5omzfawcp8b.ws.codeinstitute-ide.net',
-]
-
 print(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 CORS_ALLOW_CREDENTIALS = True
