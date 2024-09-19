@@ -15,7 +15,7 @@ class Profile(models.Model):
     country = CountryField(blank_label='(select country)')
     phone_number = PhoneNumberField(blank=True)
     content = models.TextField(blank=True)
-    image = models.ImageField(upload_to='images/', default='../default_profile_xffzir')
+    image = models.ImageField(upload_to='images/', default='images/default_profile_xffzir')
 
     class Meta:
         ordering = ['-created_at']
