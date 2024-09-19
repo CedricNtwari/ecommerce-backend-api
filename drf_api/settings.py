@@ -70,6 +70,10 @@ if DEV:
         'http://localhost:3000',
         os.environ.get('CLIENT_ORIGIN_DEV', ''),
     ]
+elif 'CLIENT_ORIGIN' in os.environ:
+    CORS_ALLOWED_ORIGINS = [
+        os.environ.get('CLIENT_ORIGIN')
+    ]
 else:
      CORS_ALLOWED_ORIGINS = [
         os.environ.get('CLIENT_ORIGIN')
