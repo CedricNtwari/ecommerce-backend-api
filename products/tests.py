@@ -40,7 +40,9 @@ class ProductTestCase(TestCase):
             description='Test Description',
             price=100.00,
             stock=10,
-            image=self.image
+            image=self.image,
+            category='men',
+            size='M'
         )
 
         # Create test review
@@ -68,7 +70,9 @@ class ProductTestCase(TestCase):
             'description': 'New Description',
             'price': 150.00,
             'stock': 5,
-            'image': self.image
+            'image': self.image,
+            'category': 'women',  
+            'size': 'L'
         }
         response = self.client.post('/products/', data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -80,6 +84,8 @@ class ProductTestCase(TestCase):
         response = self.client.get(f'/products/{self.product.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], self.product.name)
+        self.assertEqual(response.data['category'], self.product.category)
+        self.assertEqual(response.data['size'], self.product.size) 
         self.assertEqual(response.data['review_count'], 1)
         self.assertEqual(response.data['average_rating'], 5.0)
 
@@ -100,7 +106,9 @@ class ProductTestCase(TestCase):
             'description': 'Updated Description',
             'price': 120.00,
             'stock': 8,
-            'image': self.image
+            'image': self.image,
+            'category': 'kids',
+            'size': 'S'
         }
         response = self.client.put(f'/products/{self.product.id}/', data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

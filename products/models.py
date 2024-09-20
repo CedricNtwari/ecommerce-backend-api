@@ -6,6 +6,19 @@ class Product(models.Model):
     Product model, related to 'owner', i.e. a User instance.
     Default image set so that we can always reference image.url.
     """
+    CATEGORY_CHOICES = [
+        ('women', 'Women'),
+        ('men', 'Men'),
+        ('kids', 'Kids'),
+    ]
+
+    SIZE_CHOICES = [
+        ('XS', 'Extra Small'),
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    ]
     image_filter_choices = [
         ('_1977', '1977'), ('brannan', 'Brannan'),
         ('earlybird', 'Earlybird'), ('hudson', 'Hudson'),
@@ -28,6 +41,12 @@ class Product(models.Model):
     )
     image_filter = models.CharField(
         max_length=32, choices=image_filter_choices, default='normal'
+    )
+    category = models.CharField(
+        max_length=50, choices=CATEGORY_CHOICES, default='women'
+    )
+    size = models.CharField(
+        max_length=2, choices=SIZE_CHOICES, blank=True, null=True
     )
 
     class Meta:

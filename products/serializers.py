@@ -92,5 +92,5 @@ class ProductSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'name', 'description', 'price',
             'stock', 'image', 'image_filter', 'street_address', 'city', 
             'state', 'postal_code', 'country', 'phone_number',
-            'review_count', 'average_rating'
+            'review_count', 'average_rating','category', 'size'
         ]

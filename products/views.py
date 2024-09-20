@@ -18,7 +18,7 @@ class ProductList(generics.ListCreateAPIView):
         DjangoFilterBackend
     ]
     filterset_fields = [
-        'owner__profile',
+        'owner__profile','category', 'size'
     ]
     search_fields = ['owner__username', 'name']
     ordering_fields = ['created_at']
