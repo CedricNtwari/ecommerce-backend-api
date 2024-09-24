@@ -16,3 +16,12 @@ class CurrentUserSerializer(UserDetailsSerializer):
 
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + ('profile_id', 'profile_image')
+
+
+class ContactSerializer(serializers.Serializer):
+    """
+    Serializer for the Contact Us form. Validates the user's name, email, and message.
+    """
+    name = serializers.CharField(max_length=100)
+    email = serializers.EmailField()
+    message = serializers.CharField(max_length=1000)

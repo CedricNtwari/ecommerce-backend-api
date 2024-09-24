@@ -175,6 +175,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+MAILJET_API_KEY = os.environ.get('MJ_APIKEY_PUBLIC')
+MAILJET_API_SECRET = os.environ.get('MJ_APIKEY_PRIVATE')
+
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',

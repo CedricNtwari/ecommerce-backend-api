@@ -129,6 +129,10 @@ This diagram shows the relationships and fields within our database, crucial for
 - `DELETE /profiles/:id/`: Delete a profile
 - `DELETE /dj-rest-auth/user/`: Retrieve authenticated user details
 
+### Contact Form Submission
+
+- `POST /contact/`: Submit a contact form with name, email, and message. Sends an email to the administrator upon successful submission.
+
 ### Products Management
 
 - `GET /products/`: List all products

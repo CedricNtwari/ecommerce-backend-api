@@ -4,6 +4,12 @@ from .settings import (
     JWT_AUTH_COOKIE, JWT_AUTH_REFRESH_COOKIE, JWT_AUTH_SAMESITE,
     JWT_AUTH_SECURE,
 )
+from django.core.mail import send_mail
+from rest_framework import status
+from rest_framework.views import APIView
+from .serializers import ContactSerializer
+import os
+from rest_framework.permissions import AllowAny
 
 @api_view()
 def root_route(request):
@@ -47,3 +53,31 @@ def logout_route(request):
         secure=JWT_AUTH_SECURE,
     )
     return response
+
+
+class ContactUsView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = ContactSerializer(data=request.data)
+        if serializer.is_valid():
+            name = serializer.validated_data.get('name')
+            email = serializer.validated_data.get('email')
+            message = serializer.validated_data.get('message')
+
+            subject = f"New Contact Form Submission from {name}"
+            email_message = f"Message from {name} ({email}):\n\n{message}"
+            recipient_list = recipient_list=[os.environ.get('EMAIL_HOST_USER')]
+
+
+            try:
+                send_mail(
+                    subject,
+                    email_message,
+                    email,
+                    recipient_list,
+                    fail_silently=False,
+                )
+                return Response({"detail": "Message sent successfully."}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
