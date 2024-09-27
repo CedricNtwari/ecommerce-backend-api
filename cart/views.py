@@ -46,6 +46,10 @@ class CartViewSet(viewsets.ModelViewSet):
             product_id = request.data.get('product')
             quantity = request.data.get('quantity')
 
+            # Validate quantity
+            if quantity is None or quantity <= 0:
+                return Response({'detail': 'Invalid quantity. Quantity must be at least 1.'}, status=status.HTTP_400_BAD_REQUEST)
+
             try:
                 product = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
