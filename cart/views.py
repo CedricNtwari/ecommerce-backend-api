@@ -40,31 +40,31 @@ class CartViewSet(viewsets.ModelViewSet):
         """
         Adds a new item to the cart. If the item is already in the cart, it updates the quantity.
         """
-        cart, _ = Cart.objects.get_or_create(owner=request.user)
-        
-        product_id = request.data.get('product')
-        quantity = request.data.get('quantity')
-
         try:
-            product = Product.objects.get(id=product_id)
-            if quantity > product.stock:
-                return Response({'detail': 'Requested quantity exceeds available stock.'}, status=status.HTTP_400_BAD_REQUEST)
-        except Product.DoesNotExist:
-            return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+            cart, _ = Cart.objects.get_or_create(owner=request.user)
+            
+            product_id = request.data.get('product')
+            quantity = request.data.get('quantity')
 
-        cart_item, created = CartItem.objects.get_or_create(
-            cart=cart, product=product, defaults={'quantity': quantity, 'price': product.price * quantity}
-        )
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if not created:
-            if cart_item.quantity + quantity > product.stock:
-                return Response({'detail': 'Total quantity exceeds stock.'}, status=status.HTTP_400_BAD_REQUEST)
-            cart_item.quantity += quantity
-            cart_item.price = cart_item.quantity * product.price
-            cart_item.save()
+            cart_item, created = CartItem.objects.get_or_create(
+                cart=cart, product=product, defaults={'quantity': quantity, 'price': product.price * quantity}
+            )
 
-        serializer = CartItemSerializer(cart_item, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if not created:
+                cart_item.quantity += quantity
+                cart_item.price = cart_item.quantity * product.price
+                cart_item.save()
+
+            serializer = CartItemSerializer(cart_item, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(f"Error adding item to cart: {e}")
+            return Response({'detail': 'Internal server error.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def remove_item(self, request, pk=None):
