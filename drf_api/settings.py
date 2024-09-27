@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'orders',
     'cart',
     'reviews',
+    'django_extensions',
 ]
 
 SITE_ID = 1

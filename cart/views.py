@@ -47,6 +47,8 @@ class CartViewSet(viewsets.ModelViewSet):
 
         try:
             product = Product.objects.get(id=product_id)
+            if quantity > product.stock:
+                return Response({'detail': 'Requested quantity exceeds available stock.'}, status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:
             return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -55,6 +57,8 @@ class CartViewSet(viewsets.ModelViewSet):
         )
 
         if not created:
+            if cart_item.quantity + quantity > product.stock:
+                return Response({'detail': 'Total quantity exceeds stock.'}, status=status.HTTP_400_BAD_REQUEST)
             cart_item.quantity += quantity
             cart_item.price = cart_item.quantity * product.price
             cart_item.save()
@@ -64,9 +68,6 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def remove_item(self, request, pk=None):
-        """
-        Removes an item from the cart.
-        """
         cart = self.get_object()
         item_id = request.data.get('item_id')
         CartItem.objects.filter(id=item_id, cart=cart).delete()
@@ -74,14 +75,14 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def update_quantity(self, request, pk=None):
-        """
-        Updates the quantity of an existing cart item and recalculates the price based on the new quantity.
-        """
         cart = self.get_object()
         item_id = request.data.get('item_id')
         quantity = request.data.get('quantity')
+
         try:
             cart_item = CartItem.objects.get(id=item_id, cart=cart)
+            if quantity > cart_item.product.stock:
+                return Response({'detail': 'Quantity exceeds stock.'}, status=status.HTTP_400_BAD_REQUEST)
             cart_item.quantity = quantity
             cart_item.price = cart_item.quantity * cart_item.product.price
             cart_item.save()
