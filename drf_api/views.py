@@ -8,8 +8,11 @@ from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.views import APIView
 from .serializers import ContactSerializer
-import os
+import os, stripe
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.conf import settings
 
 @api_view()
 def root_route(request):
@@ -81,3 +84,31 @@ class ContactUsView(APIView):
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@api_view(['POST'])
+def create_checkout_session(request):
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': 'Your Product Name',
+                        },
+                        'unit_amount': 1500,  # Amount in cents (USD 15.00)
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url='https://trade-corner-018d2b5f7079.herokuapp.com/success',
+            cancel_url='https://trade-corner-018d2b5f7079.herokuapp.com/cancel',
+        )
+        return Response({'id': checkout_session.id})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

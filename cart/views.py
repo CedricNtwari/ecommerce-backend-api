@@ -38,17 +38,17 @@ class CartViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def add_item(self, request):
         """
-        Adds a new item to the cart. If the item is already in the cart, it updates the quantity.
+        Adds a new item to the cart. If the item is already in the cart,   it updates the quantity.
         """
         try:
             cart, _ = Cart.objects.get_or_create(owner=request.user)
-            
+
             product_id = request.data.get('product')
             quantity = request.data.get('quantity')
 
-            # Validate quantity
+            # Validate the quantity
             if quantity is None or quantity <= 0:
-                return Response({'detail': 'Invalid quantity. Quantity must be at least 1.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Invalid quantity provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 product = Product.objects.get(id=product_id)
@@ -69,6 +69,7 @@ class CartViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error adding item to cart: {e}")
             return Response({'detail': 'Internal server error.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     @action(detail=True, methods=['post'])
     def remove_item(self, request, pk=None):

@@ -6,6 +6,12 @@ from corsheaders.defaults import default_headers
 if os.path.exists('env.py'):
     import env
 
+
+# Stripe API Keys
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

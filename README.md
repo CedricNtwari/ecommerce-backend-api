@@ -188,6 +188,10 @@ This diagram shows the relationships and fields within our database, crucial for
 - `PUT /reviews/:id/`: Update a review
 - `DELETE /reviews/:id/`: Delete a review
 
+### Checkout session
+
+- `POST /reviewsreate-checkout-session/`: Create a new checkout session with Stripe
+
 ## Test Coverage
 
 To ensure the stability and reliability of the application. I use the `coverage` tool to measure how much of the codebase is covered by automated tests. This helps identify areas that may need more testing and ensures that our code is well-tested.
