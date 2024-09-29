@@ -5,6 +5,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     """
@@ -35,34 +38,91 @@ class OrderViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """
         Create a new order with a unique order number and associated items.
-        
-        The method generates a unique order number for each order and saves the order 
-        with the current user as the owner. It then creates order items based on the 
-        provided request data.
+
+        This method generates a unique order number for each order, validates the order items,
+        checks for stock availability, calculates the total price, saves the order with the 
+        current user as the owner, and sends an email confirmation to the user.
 
         Raises:
-            ValidationError: If no order items are provided in the request data.
+        ValidationError: If no order items are provided, if item data is invalid, or if 
+        stock is insufficient for any item.
         """
         import uuid
+        from decimal import Decimal
+        from django.core.mail import send_mail
+        from django.conf import settings
+        from .models import Product  # Assuming your product model is in the same app
+
+        # Generate a unique order number
         order_number = str(uuid.uuid4()).replace("-", "").upper()[:20]
 
-        # Save the order with the current user and generated order number
-        order = serializer.save(owner=self.request.user, order_number=order_number)
-
-        # Create order items (this example assumes order items are sent in the request data)
+        # Validate order items
         order_items_data = self.request.data.get('order_items', [])
-
-        # Check if order_items_data is None
-        if order_items_data is None:
+        if not order_items_data:
             raise serializers.ValidationError("No order items provided.")
 
+        # Initialize the total price
+        total_price = Decimal(0)
+
+        # Validate and check stock availability for each item
         for item_data in order_items_data:
             product_id = item_data['product']
             quantity = item_data['quantity']
-            price = item_data['price']
-            OrderItem.objects.create(order=order, product_id=product_id, quantity=quantity, price=price)
+            price = Decimal(item_data['price'])
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Fetch the product from the database to check stock availability
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                raise serializers.ValidationError(f"Product with ID {product_id} does not exist.")
+
+            # Check if there is enough stock for the requested quantity
+            if product.stock < quantity:
+                raise serializers.ValidationError(f"Not enough stock for product '{product.name}'. Only {product.stock} left.")
+
+            # Calculate the total price for this item
+            total_price += price * quantity
+
+        # Save the order with the current user and generated order number
+        order = serializer.save(owner=self.request.user, order_number=order_number, total_price=total_price)
+
+        # Create the order items and update product stock
+        for item_data in order_items_data:
+            product_id = item_data['product']
+            quantity = item_data['quantity']
+            price = Decimal(item_data['price'])
+
+            # Fetch the product and reduce stock
+            product = Product.objects.get(id=product_id)
+            product.stock -= quantity  # Deduct the purchased quantity from stock
+            product.save()  # Save the updated stock to the database
+
+        # Create the order item
+        OrderItem.objects.create(order=order, product=product, quantity=quantity, price=price)
+
+        # Send order confirmation email
+        subject = f"Order Confirmation - {order_number}"
+        message = (
+            f"Dear {self.request.user.username},\n\n"
+            f"Thank you for your order. Your order number is {order_number}.\n\n"
+            f"Total Price: ${order.total_price}\n\n"
+            f"We will notify you once the order is processed."
+        )
+        recipient_list = [self.request.user.email]
+
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                recipient_list,
+                fail_silently=False,
+            )
+        except Exception as e:
+            raise serializers.ValidationError({"error": f"Failed to send confirmation email. Error: {str(e)}"})
+
+        return order
+
 
     def perform_update(self, serializer):
         """
@@ -74,9 +134,27 @@ class OrderViewSet(viewsets.ModelViewSet):
             ValidationError: If attempting to modify an order that is already delivered or cancelled.
         """
         instance = self.get_object()
-        if instance.status in ['Delivered', 'Cancelled']:
-            raise serializers.ValidationError("Cannot modify delivered or cancelled orders.")
-        serializer.save()
+        previous_status = instance.status
+        order = super().perform_update(serializer)
+    
+         # If the status has changed, send an email notification
+        if previous_status != instance.status:
+            subject = f"Order {instance.order_number} Status Update"
+            message = f"Dear {self.request.user.username},\n\nYour order {instance.order_number} status has been updated to {instance.status}."
+            recipient_list = [self.request.user.email]
+
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                recipient_list,
+                fail_silently=False,
+            )
+        except Exception as e:
+            raise serializers.ValidationError({"error": "Failed to send status update email."})
+
+        return order
 
     @action(detail=True, methods=['post'])
     def add_item(self, request, pk=None):
