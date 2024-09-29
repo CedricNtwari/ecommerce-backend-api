@@ -91,24 +91,30 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 @api_view(['POST'])
 def create_checkout_session(request):
     try:
+        cart = request.data['cart']
+        
+        line_items = [
+            {
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': item['product']['name'],
+                    },
+                    'unit_amount': int(float(item['product']['price']) * 100),
+                },
+                'quantity': item['quantity'],
+            }
+            for item in cart['items']
+        ]
+        
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
-            line_items=[
-                {
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': 'Your Product Name',
-                        },
-                        'unit_amount': 1500,  # Amount in cents (USD 15.00)
-                    },
-                    'quantity': 1,
-                },
-            ],
+            line_items=line_items,
             mode='payment',
             success_url='https://trade-corner-018d2b5f7079.herokuapp.com/success',
             cancel_url='https://trade-corner-018d2b5f7079.herokuapp.com/cancel',
         )
+
         return Response({'id': checkout_session.id})
     except Exception as e:
         return Response({'error': str(e)}, status=500)
