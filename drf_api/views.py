@@ -111,8 +111,8 @@ def create_checkout_session(request):
             payment_method_types=['card'],
             line_items=line_items,
             mode='payment',
-            success_url='https://trade-corner-018d2b5f7079.herokuapp.com/success',
-            cancel_url='https://trade-corner-018d2b5f7079.herokuapp.com/cancel',
+            success_url='https://trade-corner-018d2b5f7079.herokuapp.com/payment-success',
+            cancel_url='https://trade-corner-018d2b5f7079.herokuapp.com/payment-failure',
         )
 
         return Response({'id': checkout_session.id})
