@@ -153,7 +153,7 @@ This diagram shows the relationships and fields within our database, crucial for
 
 ### Order History
 
-- `GET /order-history/`: List all reviews
+- `GET /order-history/`: List user personal orders
 
 ### Search and Filter Endpoints
 
