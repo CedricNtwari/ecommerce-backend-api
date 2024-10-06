@@ -10,6 +10,7 @@ from django.conf import settings
 import stripe
 import uuid
 from decimal import Decimal
+import logging
 
 
 # Order ViewSet
@@ -114,6 +115,7 @@ class OrderHistoryView(generics.ListAPIView):
         """
         return Order.objects.filter(owner=self.request.user)
 
+logger = logging.getLogger(__name__)
 
 # Stripe webhook handler
 @api_view(['POST'])
@@ -126,15 +128,18 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError:
+    except ValueError as e:
+        logger.error(f"Invalid payload: {e}")
         return Response(status=400)
-    except stripe.error.SignatureVerificationError:
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Signature verification failed: {e}")
         return Response(status=400)
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         create_order_and_send_email(session)
-
+        
+    logger.info(f"Processed Stripe event: {event['type']}")
     return Response(status=200)
 
 
