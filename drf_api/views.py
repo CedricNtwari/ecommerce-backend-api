@@ -136,7 +136,10 @@ def stripe_webhook(request):
 @api_view(['POST'])
 def create_checkout_session(request):
     try:
-        cart_id = request.data['cart_id']
+        cart_id = request.data.get('cart_id')
+        if not cart_id:
+            return Response({'error': 'cart_id is required'}, status=400)
+
         cart = Cart.objects.get(id=cart_id)
 
         line_items = [
@@ -163,5 +166,7 @@ def create_checkout_session(request):
         )
 
         return Response({'id': checkout_session.id})
+    except Cart.DoesNotExist:
+        return Response({'error': 'Cart not found'}, status=404)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
