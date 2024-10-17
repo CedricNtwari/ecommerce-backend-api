@@ -118,9 +118,8 @@ class OrderHistoryView(generics.ListAPIView):
 
 logger = logging.getLogger(__name__)
 
-# Stripe webhook handler
 @api_view(['POST'])
-def stripe_webhook(request):
+def stripe_order_webhook(request):
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
     event = None
@@ -151,32 +150,26 @@ def create_order_and_send_email(session):
     customer_email = session['customer_details']['email']
     line_items = session['line_items']['data']
     
-    # Fetch the metadata if cart info is passed
     cart_id = session.get('metadata', {}).get('cart_id')
     
     try:
-        # Fetch the cart from the cart ID, if passed
         cart = Cart.objects.get(id=cart_id)
     except Cart.DoesNotExist:
         raise serializers.ValidationError({'detail': 'Cart not found for the session.'})
 
-    # Generate an order number
     order_number = str(uuid.uuid4()).replace("-", "").upper()[:20]
-    
-    # Validate and calculate total price
+
     total_price = Decimal(0)
     for item in cart.items.all():
         total_price += item.product.price * item.quantity
 
-    # Create the order and save to the database
     order = Order.objects.create(
         owner_email=customer_email, 
         order_number=order_number, 
         total_price=total_price,
-        owner=cart.owner  # Assuming Cart has an owner field linked to the user
+        owner=cart.owner
     )
 
-    # Create order items and update stock
     for item in cart.items.all():
         OrderItem.objects.create(
             order=order, 
@@ -186,13 +179,11 @@ def create_order_and_send_email(session):
         )
         item.product.stock -= item.quantity
         if item.product.stock <= 0:
-            item.product.available = False  # Mark as out of stock
+            item.product.available = False
         item.product.save()
 
-    # Clear the cart
     cart.items.all().delete()
 
-    # Send the confirmation email
     subject = f"Order Confirmation - {order_number}"
     message = f"Dear {customer_email},\n\nThank you for your order. Your order number is {order_number}."
     try:

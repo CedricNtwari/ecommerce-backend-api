@@ -10,14 +10,23 @@ from rest_framework.views import APIView
 from .serializers import ContactSerializer
 import os, stripe
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.conf import settings
 from django.db import transaction
 from cart.models import Cart
 from products.models import Product
+from orders.models import Order, OrderItem
+from decimal import Decimal
+import uuid
+from orders.models import Order, OrderItem 
 
+
+# Initialize Stripe API key
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+# Logging setup for debugging
+import logging
+logger = logging.getLogger(__name__)
 
 @api_view()
 def root_route(request):
@@ -30,7 +39,6 @@ def root_route(request):
     return Response({
         "message": "Welcome to the eCommerce Backend API! Manage products, user authentication, orders and reviews efficiently."
     })
-
 
 @api_view(['POST'])
 def logout_route(request):
@@ -62,7 +70,6 @@ def logout_route(request):
     )
     return response
 
-
 class ContactUsView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -75,7 +82,6 @@ class ContactUsView(APIView):
             subject = f"New Contact Form Submission from {name}"
             email_message = f"Message from {name} ({email}):\n\n{message}"
             recipient_list = recipient_list=[os.environ.get('EMAIL_HOST_USER')]
-
 
             try:
                 send_mail(
@@ -100,38 +106,73 @@ def stripe_webhook(request):
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
     except ValueError as e:
+        logger.error(f"Invalid payload: {e}")
         return Response(status=400)
     except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Signature verification failed: {e}")
         return Response(status=400)
 
-    # Only handle the successful checkout session completed event
+    logger.info(f"Received Stripe event: {event['type']}")
+    
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
 
-        # Assuming order_data is stored in the session metadata
-        order_data = session.get('metadata', {}).get('order_data')
+        # Get the cart_id from metadata
+        cart_id = session.get('metadata', {}).get('cart_id')
 
-        if order_data:
-            # Update product stock and availability
+        try:
+            # Fetch the cart from the database
+            cart = Cart.objects.get(id=cart_id)
+            logger.info(f"Processing order for cart ID: {cart_id}")
+
+            # Calculate the total price
+            total_price = Decimal(0)
+            for item in cart.items.all():
+                total_price += item.product.price * item.quantity
+
+            # Generate order number
+            order_number = str(uuid.uuid4()).replace("-", "").upper()[:20]
+
+            # Get the customer email from the Stripe session data
+            customer_email = session['customer_details']['email']
+
+            # Create order with transaction.atomic to ensure integrity
             with transaction.atomic():
-                for item in order_data['order_items']:
-                    product = Product.objects.get(id=item['product'])
-                    
-                    # Reduce product stock by the purchased quantity
-                    product.stock -= item['quantity']
-                    
-                    # If stock reaches 0, mark the product as unavailable
-                    if product.stock <= 0:
-                        product.stock = 0
-                        product.available = False
-                        
-                    # Save the updated product details
-                    product.save()
+                order = Order.objects.create(
+                    owner=cart.owner,
+                    order_number=order_number,
+                    total_price=total_price
+                )
 
-                # You could also save the order here to order history if needed.
-        
+                # Create order items and update product stock
+                for item in cart.items.all():
+                    OrderItem.objects.create(
+                        order=order,
+                        product=item.product,
+                        quantity=item.quantity,
+                        price=item.product.price * item.quantity
+                    )
+                    # Update product stock
+                    item.product.stock -= item.quantity
+                    item.product.save()
+
+                # Clear the cart
+                cart.items.all().delete()
+
+            # Send confirmation email using the email from Stripe session
+            send_mail(
+                'Order Confirmation',
+                f'Thank you for your order {order.order_number}. Your total is {order.total_price}.',
+                settings.EMAIL_HOST_USER,
+                [customer_email],
+                fail_silently=False
+            )
+            logger.info(f"Order created and confirmation email sent for order ID: {order.id}")
+
+        except Cart.DoesNotExist:
+            logger.error(f"Cart not found for ID: {cart_id}")
+
     return Response(status=200)
-
 
 @api_view(['POST'])
 def create_checkout_session(request):
