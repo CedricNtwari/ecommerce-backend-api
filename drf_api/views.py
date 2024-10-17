@@ -13,6 +13,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.conf import settings
+from django.db import transaction
+from cart.models import Cart
+from products.models import Product
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @api_view()
 def root_route(request):
@@ -84,35 +89,77 @@ class ContactUsView(APIView):
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+@api_view(['POST'])
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        return Response(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return Response(status=400)
+
+    # Only handle the successful checkout session completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+
+        # Assuming order_data is stored in the session metadata
+        order_data = session.get('metadata', {}).get('order_data')
+
+        if order_data:
+            # Update product stock and availability
+            with transaction.atomic():
+                for item in order_data['order_items']:
+                    product = Product.objects.get(id=item['product'])
+                    
+                    # Reduce product stock by the purchased quantity
+                    product.stock -= item['quantity']
+                    
+                    # If stock reaches 0, mark the product as unavailable
+                    if product.stock <= 0:
+                        product.stock = 0
+                        product.available = False
+                        
+                    # Save the updated product details
+                    product.save()
+
+                # You could also save the order here to order history if needed.
+        
+    return Response(status=200)
+
 
 @api_view(['POST'])
 def create_checkout_session(request):
     try:
-        cart = request.data['cart']
-        
+        cart_id = request.data['cart_id']
+        cart = Cart.objects.get(id=cart_id)
+
         line_items = [
             {
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {
-                        'name': item['product']['name'],
+                        'name': item.product.name,
                     },
-                    'unit_amount': int(float(item['product']['price']) * 100),
+                    'unit_amount': int(float(item.product.price) * 100),
                 },
-                'quantity': item['quantity'],
+                'quantity': item.quantity,
             }
-            for item in cart['items']
+            for item in cart.items.all()
         ]
-        
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=line_items,
             mode='payment',
-            success_url='https://trade-corner-018d2b5f7079.herokuapp.com/payment-success',
-            cancel_url='https://trade-corner-018d2b5f7079.herokuapp.com/payment-failure',
+            success_url='https://your-domain.com/payment-success',
+            cancel_url='https://your-domain.com/payment-failure',
+            metadata={'cart_id': cart_id}
         )
 
         return Response({'id': checkout_session.id})

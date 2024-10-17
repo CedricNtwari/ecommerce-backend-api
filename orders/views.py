@@ -149,24 +149,49 @@ def create_order_and_send_email(session):
     """
     customer_email = session['customer_details']['email']
     line_items = session['line_items']['data']
+    
+    # Fetch the metadata if cart info is passed
+    cart_id = session.get('metadata', {}).get('cart_id')
+    
+    try:
+        # Fetch the cart from the cart ID, if passed
+        cart = Cart.objects.get(id=cart_id)
+    except Cart.DoesNotExist:
+        raise serializers.ValidationError({'detail': 'Cart not found for the session.'})
 
-    # Order creation logic (similar to perform_create in your OrderViewSet)
+    # Generate an order number
     order_number = str(uuid.uuid4()).replace("-", "").upper()[:20]
+    
+    # Validate and calculate total price
     total_price = Decimal(0)
+    for item in cart.items.all():
+        total_price += item.product.price * item.quantity
 
-    # Create order and save to the database
-    order = Order.objects.create(owner_email=customer_email, order_number=order_number, total_price=total_price)
+    # Create the order and save to the database
+    order = Order.objects.create(
+        owner_email=customer_email, 
+        order_number=order_number, 
+        total_price=total_price,
+        owner=cart.owner  # Assuming Cart has an owner field linked to the user
+    )
 
-    # Add order items
-    for item in line_items:
-        product = Product.objects.get(name=item['description'])  # Assuming product name is unique
-        quantity = item['quantity']
-        price = Decimal(item['amount_total']) / 100
-        OrderItem.objects.create(order=order, product=product, quantity=quantity, price=price)
-        product.stock -= quantity
-        product.save()
+    # Create order items and update stock
+    for item in cart.items.all():
+        OrderItem.objects.create(
+            order=order, 
+            product=item.product, 
+            quantity=item.quantity, 
+            price=item.product.price * item.quantity
+        )
+        item.product.stock -= item.quantity
+        if item.product.stock <= 0:
+            item.product.available = False  # Mark as out of stock
+        item.product.save()
 
-    # Send confirmation email
+    # Clear the cart
+    cart.items.all().delete()
+
+    # Send the confirmation email
     subject = f"Order Confirmation - {order_number}"
     message = f"Dear {customer_email},\n\nThank you for your order. Your order number is {order_number}."
     try:

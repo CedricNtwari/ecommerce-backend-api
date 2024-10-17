@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
-from .views import root_route, logout_route, ContactUsView, create_checkout_session
+from .views import root_route, logout_route, ContactUsView, create_checkout_session, stripe_webhook
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,4 +33,5 @@ urlpatterns = [
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     path('contact-us/', ContactUsView.as_view(), name='contact_us'),
     path('create-checkout-session/', create_checkout_session, name='create-checkout-session'),
+    path('stripe-webhook/', stripe_webhook, name='stripe-webhook'),
 ]
