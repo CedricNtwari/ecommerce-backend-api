@@ -12,6 +12,7 @@ import uuid
 from decimal import Decimal
 import stripe
 import logging
+from .serializers import OrderSerializer
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -37,6 +38,11 @@ def stripe_order_webhook(request):
         process_order_from_session(session)
 
     return Response(status=200)
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
 
 def create_stripe_invoice(session, cart, total_price, order_number):
     # Create customer in Stripe if not already exists
