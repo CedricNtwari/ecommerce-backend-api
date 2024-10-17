@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .settings import (
     JWT_AUTH_COOKIE, JWT_AUTH_REFRESH_COOKIE, JWT_AUTH_SAMESITE,
@@ -18,7 +18,8 @@ from products.models import Product
 from orders.models import Order, OrderItem
 from decimal import Decimal
 import uuid
-from orders.models import Order, OrderItem 
+from orders.models import Order, OrderItem
+from rest_framework.permissions import AllowAny
 
 
 # Initialize Stripe API key
@@ -97,6 +98,7 @@ class ContactUsView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']

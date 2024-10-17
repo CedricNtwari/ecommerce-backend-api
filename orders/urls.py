@@ -9,6 +9,6 @@ router.register(r'order-items', OrderItemViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('order-history/', OrderHistoryView.as_view(), name='order-history'),
-    path('stripe-webhook/', stripe_order_webhook, name='stripe-webhook'),
+    path('stripe-webhook/orders/', stripe_order_webhook, name='stripe-order-webhook'),
 
 ]
