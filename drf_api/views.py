@@ -160,8 +160,8 @@ def create_checkout_session(request):
             payment_method_types=['card'],
             line_items=line_items,
             mode='payment',
-            success_url='https://your-domain.com/payment-success',
-            cancel_url='https://your-domain.com/payment-failure',
+            success_url='https://trade-corner-018d2b5f7079.herokuapp.com/payment-success',
+            cancel_url='https://trade-corner-018d2b5f7079.herokuapp.com/payment-failure',
             metadata={'cart_id': cart_id}
         )
 
