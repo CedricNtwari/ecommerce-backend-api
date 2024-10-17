@@ -88,10 +88,10 @@ else:
         os.environ.get('CLIENT_ORIGIN')
     ]
      
-""" CORS_ALLOWED_ORIGINS = [
+CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://3000-cedricntwar-tradecorner-5omzfawcp8b.ws.codeinstitute-ide.net',
-] """
+]
 
 print(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
