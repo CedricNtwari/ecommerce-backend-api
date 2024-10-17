@@ -1,7 +1,7 @@
 from rest_framework import viewsets, serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
@@ -12,7 +12,7 @@ import uuid
 from decimal import Decimal
 import stripe
 import logging
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, OrderItemSerializer
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -43,6 +43,12 @@ def stripe_order_webhook(request):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+
+class OrderItemViewSet(viewsets.ModelViewSet):
+    queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
+    permission_classes = [IsAuthenticated]
 
 def create_stripe_invoice(session, cart, total_price, order_number):
     # Create customer in Stripe if not already exists

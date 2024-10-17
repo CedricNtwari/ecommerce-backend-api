@@ -150,6 +150,10 @@ This diagram shows the relationships and fields within our database, crucial for
 - `DELETE /orders/{id}/`: Delete an order by ID (admin only)
 - `POST /orders/{id}/cancel/`: Cancel an order by ID
 - `POST /orders/{id}/add_item/`: Add an item to an order
+- `GET /order-items/` : to list all OrderItem objects
+- `POST /order-items/` : to create a new OrderItem
+- `PUT /order-items/<id>/` : to update an existing OrderItem
+- `DELETE /order-items/<id>/` : to delete an OrderItem
 
 ### Order History
 
