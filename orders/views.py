@@ -184,10 +184,30 @@ def create_order_and_send_email(session):
 
     cart.items.all().delete()
 
-    subject = f"Order Confirmation - {order_number}"
-    message = f"Dear {customer_email},\n\nThank you for your order. Your order number is {order_number}."
+    subject = f"Your Order Confirmation - {order_number}"
+    message = f"""
+        Dear {customer_email},
+
+        Thank you for shopping with us! 
+
+        We're excited to confirm that we've received your order. Your order number is **{order_number}**. You can expect an update from us as soon as your items are shipped.
+
+        Here are the details of your purchase:
+        - Order Number: {order_number}
+        - Total: ${total_price} USD (you can calculate and insert the total price here if available)
+
+        We'll be sure to notify you with a tracking number once your order has been dispatched.
+
+        In the meantime, if you have any questions or need further assistance, feel free to contact our support team. We're here to help!
+
+        Best regards,
+        Trade Corner
+        {settings.EMAIL_HOST_USER}
+
+        Thank you again for your trust in us!
+        """
+
     try:
         send_mail(subject, message, settings.EMAIL_HOST_USER, [customer_email], fail_silently=False)
     except Exception as e:
         raise serializers.ValidationError({"error": f"Failed to send confirmation email. Error: {str(e)}"})
-
