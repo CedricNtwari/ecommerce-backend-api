@@ -11,6 +11,7 @@ import stripe
 import uuid
 from decimal import Decimal
 import logging
+from cart.models import Cart
 
 
 # Order ViewSet
