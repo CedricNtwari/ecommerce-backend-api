@@ -8,6 +8,7 @@ from django.conf import settings
 from cart.models import Cart
 from products.models import Product
 from .models import Order, OrderItem
+from rest_framework.views import APIView
 import uuid
 from decimal import Decimal
 import stripe
@@ -50,24 +51,29 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     serializer_class = OrderItemSerializer
     permission_classes = [IsAuthenticated]
 
+class OrderHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(owner=request.user)
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
 def create_stripe_invoice(session, cart, total_price, order_number):
-    # Create customer in Stripe if not already exists
     stripe_customer = stripe.Customer.create(
         email=session['customer_details']['email'],
         name=session['customer_details']['name'],
         address=session['customer_details']['address']
     )
 
-    # Prepare invoice items based on cart
     for item in cart.items.all():
         stripe.InvoiceItem.create(
             customer=stripe_customer.id,
-            amount=int(item.product.price * 100),  # Convert to cents
+            amount=int(item.product.price * 100),
             currency="usd",
             description=f"{item.product.name} (Quantity: {item.quantity})"
         )
 
-    # Create the invoice
     invoice = stripe.Invoice.create(
         customer=stripe_customer.id,
         collection_method='send_invoice',
@@ -77,10 +83,8 @@ def create_stripe_invoice(session, cart, total_price, order_number):
         }
     )
 
-    # Finalize and send the invoice to the customer
     stripe.Invoice.finalize_invoice(invoice.id)
 
-    # Return the invoice URL for reference
     return invoice.hosted_invoice_url
 
 
@@ -94,14 +98,12 @@ def process_order_from_session(session):
         order_number = generate_order_number()
 
         with transaction.atomic():
-            # Create Order
             order = Order.objects.create(
                 owner=cart.owner,
                 order_number=order_number,
                 total_price=total_price
             )
 
-            # Create Order Items and Update Stock
             for item in cart.items.all():
                 OrderItem.objects.create(
                     order=order,
@@ -111,13 +113,10 @@ def process_order_from_session(session):
                 )
                 update_product_stock(item.product, item.quantity)
 
-            # Clear Cart
             cart.items.all().delete()
 
-            # Create Stripe Invoice
             invoice_url = create_stripe_invoice(session, cart, total_price, order_number)
 
-            # Send Confirmation Email with Invoice
             send_order_confirmation_email(customer_email, order, invoice_url)
 
     except Cart.DoesNotExist:
