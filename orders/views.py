@@ -6,7 +6,6 @@ from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
 from cart.models import Cart
-from products.models import Product
 from .models import Order, OrderItem
 from rest_framework.views import APIView
 import uuid
