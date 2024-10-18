@@ -2,28 +2,30 @@ from rest_framework import serializers
 from .models import Order, OrderItem
 from products.models import Product
 from profiles.serializers import ProfileSerializer
+from products.serializers import ProductSerializer
 import uuid
 
 class OrderItemSerializer(serializers.ModelSerializer):
     """
     Serializer for OrderItem instances.
     
-    Links an OrderItem to its respective Order and Product. Allows for primary key relationships
-    to be established with both the order and the product, enabling simple reference in the API.
+    This serializer links an OrderItem to its respective Order and Product.
+    It now includes full product details instead of just the product ID.
     """
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    product = ProductSerializer(read_only=True)  # Use ProductSerializer to include full product details
     order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
 
     class Meta:
         model = OrderItem
         fields = ['id', 'order', 'product', 'quantity', 'price']
 
+
 class OrderSerializer(serializers.ModelSerializer):
     """
     Serializer for Order instances.
 
-    Serializes order data including items, owner, and owner's profile. Automatically generates a
-    unique order number upon creation using a UUID, truncated to 20 characters.
+    Serializes order data including items, owner, and owner's profile.
+    Automatically generates a unique order number upon creation using a UUID, truncated to 20 characters.
     """
     items = OrderItemSerializer(many=True, read_only=True)
     owner = serializers.ReadOnlyField(source='owner.username')
