@@ -18,6 +18,7 @@ Welcome to the backend of TradeCorner, a robust and scalable eCommerce platform 
 - [Test Covarage](#test-coverage)
 - [Version Control](#version-control)
 - [Deployment to Heroku](#deployment-to-heroku)
+- [Credits](#credits)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Contact](#contact)
@@ -309,6 +310,20 @@ heroku run python manage.py createsuperuser
   ```
 
 The application is deployed on Heroku: Budget Explorer on [Heroku](https://budget-explorer-b9fdc935d3db.herokuapp.com/).
+
+## Credits
+
+- **Code Institute**
+  This project was created as part of the Full Stack Web Developer program at Code Institute. Their curriculum, mentorship, and resources were instrumental in guiding the development process. https://codeinstitute.net/global/
+
+- **Mailjet**
+  Mailjet was used to handle email communication in the application, such as sending confirmation emails and other notifications. https://www.mailjet.com/
+
+- **Stripe**
+  Stripe was used for the payment processing system, providing a secure and efficient way to handle transactions in the platform. https://stripe.com/en-ch
+
+- **Cloudinary**
+  Cloudinary was utilized for image hosting and media storage, ensuring that product images are stored efficiently and delivered quickly to users. https://cloudinary.com/
 
 ## Documentation
 
