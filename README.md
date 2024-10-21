@@ -16,6 +16,8 @@ Welcome to the backend of TradeCorner, a robust and scalable eCommerce platform 
   - [Running the Application](#running-the-application)
 - [API Endpoints](#api-endpoints)
 - [Test Covarage](#test-coverage)
+- [Version Control](#version-control)
+- [Deployment to Heroku](#deployment-to-heroku)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Contact](#contact)
@@ -199,7 +201,7 @@ This diagram shows the relationships and fields within our database, crucial for
 
 ### Checkout session
 
-- `POST /reviewsreate-checkout-session/`: Create a new checkout session with Stripe
+- `POST /create-checkout-session/`: Create a new checkout session with Stripe
 
 ## Test Coverage
 
@@ -211,6 +213,102 @@ As of the latest run, our test coverage is as follows:
 
 ![Overall Coverage](/assets/coverage-.png)
 ![Overall Coverage](/assets/coverage.png)
+
+## Version Control: Git, GitHub
+
+## Deployment to Heroku
+
+The application is deployed to Heroku, and here are the steps to set up the project:
+
+**1. Set Up a Heroku Account:** Create an account at at [Heroku](https://signup.heroku.com/). - Optionally, install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
+
+**2.Create a new Heroku App:**
+
+- Log in to Heroku and create a new app.
+- Choose a unique name and select a region (United States or Europe).
+
+  **3.Set Up External PostgreSQL Database:**
+
+- If you're using an external PostgreSQL database instead of Heroku’s built-in Postgres add-on, follow these steps:
+
+- Ensure that you have the PostgreSQL database already set up with the necessary credentials (host, database name, username, and password).
+- In your **env.py**, set the **DATABASE_URL** to the correct connection string.
+
+- You do not need to add the Heroku Postgres add-on in this case, but you must set the DATABASE_URL environment variable in Heroku’s Config Vars (Step 7.5).
+
+**4.Connect Your App to GitHub:**
+
+- In the Deploy tab on Heroku, select GitHub as your deployment method and connect your GitHub repository.
+
+**5.Set Environment Variables:**
+
+Set all environment variables in Heroku.
+
+- Go to the **Settings** tab in Heroku & Click **Reveal Config Vars** and add the following variables:
+
+```
+DATABASE_URL=your_database_url
+SECRET_KEY=your_secret_key
+CLOUDINARY_URL=your_cloudinary_url
+MAILJET_API_KEY=your_mailjet_api_key
+MAILJET_API_SECRET=your_mailjet_api_secret
+DEV = 1
+CLIENT_ORIGIN_DEV=your-frontend-deplyoment
+STRIPE_SECRET_KEY=your-stripe-secret-key
+STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
+DEBUG=False
+```
+
+6.**Prepare the Application for Deployment:**
+
+- Ensure you have a Procfile that tells Heroku how to run your app
+
+```
+web: gunicorn app_name.wsgi
+```
+
+- Update your **requirements.txt** file by running:
+
+```
+pip freeze > requirements.txt
+```
+
+- Heroku doesn't serve static files by default. Configure your **settings.py**:
+
+```
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+```
+
+- Ensure your migrations are up to date:
+
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+
+**7.Deploy the Application:**
+
+- In the **Deploy** tab on Heroku, select the branch to deploy and click **Deploy Branch**.
+
+**8.Create a Superuser (Optional):**
+
+-To access the Django admin panel, create a **superuser**:
+
+```
+heroku run python manage.py createsuperuser
+```
+
+9.**Open Your App:**
+
+- Visit app at:
+
+  ```
+  https://<your-app-name>.herokuapp.com
+  ```
+
+The application is deployed on Heroku: Budget Explorer on [Heroku](https://budget-explorer-b9fdc935d3db.herokuapp.com/).
 
 ## Documentation
 
