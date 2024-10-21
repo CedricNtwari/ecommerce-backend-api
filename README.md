@@ -1,6 +1,8 @@
 # eCommerce Backend API
 
-A scalable eCommerce backend API built with Django Rest Framework, providing robust APIs for product management, user authentication, order processing, and reviews. This backend is designed to be the foundation for a dynamic and user-friendly eCommerce platform.
+**Slogan:** Empowering Digital Commerce with Scalable APIs
+
+Welcome to the backend of TradeCorner, a robust and scalable eCommerce platform built with Django Rest Framework. This API serves as the foundation for product management, user authentication, order processing, and reviews, ensuring seamless and secure transactions.
 
 ## Table of Contents
 
@@ -20,24 +22,27 @@ A scalable eCommerce backend API built with Django Rest Framework, providing rob
 
 ## Project Overview
 
-This repository contains the backend for a scalable eCommerce application developed using Django Rest Framework. It includes comprehensive APIs for managing products, users, orders, and reviews. The backend is designed with modularity and scalability in mind, making it a solid foundation for building dynamic and user-friendly eCommerce platforms.
+**TradeCorner** provides an eCommerce backend built using Django Rest Framework (DRF). This API offers a modular structure allowing flexibility and scalability, making it ideal for building dynamic online stores.
+
+Whether you are managing user profiles, handling orders, or managing product inventory, this API ensures optimized performance and secure transactions.
 
 ## Features
 
-- User Authentication and Profile Management
-- Product Management with Category and Stock Control
-- Order Processing with Order Item Management
-- Product Reviews and Ratings
-- Secure and Optimized API Endpoints
+- **User Authentication and Profile Management:** Secure user authentication using JWT with profile customization.
+- **Product Management:** Add, update, and manage products, categories, and stock control.
+- **Order Management:** Process orders with full support for order items and order history.
+- **Review System:** Users can leave reviews and rate products.
+- **Optimized API Endpoints:** Well-structured, secured, and optimized for performance.
+- **Search and Filtering:** Advanced search and filter functionalities across orders and products.
+- **Email Notifications:** Integrated email services for order confirmations and alerts.
 
 ## Technologies Used
 
-- Django
-- Django Rest Framework
-- PostgreSQL
-- Docker (optional for containerization)
-- JWT for Authentication
-- Git & GitHub for version control
+- **Django:** Web framework for rapid development.
+- **Django Rest Framework (DRF):** API development framework.
+- **PostgreSQL:** Relational database management system.
+- **JWT:** Token-based authentication for secure API calls.
+- **Git & GitHub:** Version control and project management.
 
 ## Database Schema
 
@@ -95,7 +100,7 @@ This diagram shows the relationships and fields within our database, crucial for
 5. **Create a superuser**
 
    ```sh
-   python manage.py runserver
+   python manage.py createsuperuser
    ```
 
 6. **Running the Application**
