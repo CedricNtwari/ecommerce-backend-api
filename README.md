@@ -215,6 +215,21 @@ As of the latest run, our test coverage is as follows:
 ![Overall Coverage](/assets/coverage-.png)
 ![Overall Coverage](/assets/coverage.png)
 
+### Code Quality and Validation
+
+To ensure code quality, adherence to style guidelines, and correctness, I use the following tools:
+
+- **Black**: Used to automatically format Python code, ensuring consistency and adherence to PEP 8 standards.
+- **Flake8**: A Python tool used to check for errors, enforce coding style (PEP 8), and look for code quality issues.
+
+```
+# Run Black to format the code
+black .
+
+# Run Flake8 to check for style issues
+flake8
+```
+
 ## Version Control: Git, GitHub
 
 ## Deployment to Heroku
